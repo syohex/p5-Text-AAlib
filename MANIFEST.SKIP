@@ -13,3 +13,5 @@
 \.cvsignore
 \.shipit
 MYMETA
+ppport.h
+xs-src/AAlib.[co]
