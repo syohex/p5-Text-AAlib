@@ -56,7 +56,7 @@ __END__
 
 =head1 NAME
 
-Text::AAlib -
+Text::AAlib - Perl Binding for AAlib
 
 =head1 SYNOPSIS
 
@@ -64,7 +64,8 @@ Text::AAlib -
 
 =head1 DESCRIPTION
 
-Text::AAlib is
+Text::AAlib is perl binding for AAlib. AAlib is a library for creating
+ascii art(AA).
 
 =head1 AUTHOR
 
@@ -80,5 +81,7 @@ This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
 
 =head1 SEE ALSO
+
+L<http://aa-project.sourceforge.net/aalib/>
 
 =cut
