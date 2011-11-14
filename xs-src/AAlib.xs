@@ -9,10 +9,9 @@
 MODULE = Text::AAlib    PACKAGE = Text::AAlib
 
 void
-_new(SV *class, SV *filename, SV *width, SV *height)
+_init(SV *filename, SV *width, SV *height)
 CODE:
 {
-    SV *self;
     aa_context *context;
     aa_savedata save_data;
     struct aa_hardware_params param;
@@ -34,12 +33,7 @@ CODE:
         croak("Error aa_init");
     }
 
-    self = sv_2mortal( newSViv(PTR2IV(context)) );
-    self = newRV_noinc(self);
-
-    sv_bless(self, gv_stashpv(SvPV_nolen(class), 0));
-
-    ST(0) = self;
+    ST(0) = sv_2mortal( newSViv(PTR2IV(context)) );
     XSRETURN(1);
 }
 
@@ -68,7 +62,7 @@ CODE:
 }
 
 void
-flush(SV *self)
+_flush(SV *self)
 CODE:
 {
     aa_context *context;
@@ -78,7 +72,7 @@ CODE:
 }
 
 void
-close(SV *self)
+_close(SV *self)
 CODE:
 {
     aa_context *context;
@@ -86,4 +80,3 @@ CODE:
     context = INT2PTR(aa_context*, SvIV(SvRV(self)));
     aa_close(context);
 }
-

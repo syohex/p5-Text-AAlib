@@ -25,7 +25,14 @@ sub new {
         $height = POSIX::ceil($opt->{height} / 2);
     }
 
-    return $class->_new($file, $width, $height);
+    my $context = Text::AAlib::_init($file, $width, $height);
+
+    bless {
+        _context    => $context,
+        is_rendered => 0,
+        is_flushed  => 0,
+        is_closed   => 0,
+    }, $class;
 }
 
 sub putpixel {
@@ -35,7 +42,7 @@ sub putpixel {
     die "Can't specified 'y' parameter" unless defined $y;
     die "Can't specified 'color' parameter" unless defined $color;
 
-    $self->_putpixel($x, $y, int($color * 256));
+    Text::AAlib::_putpixel($self->{_context}, $x, $y, int($color * 256));
 }
 
 sub fastrender {
@@ -44,7 +51,30 @@ sub fastrender {
     $x1 ||= 0;
     $y1 ||= 0;
 
-    $self->_fastrender($x1, $y1, $x2, $y2);
+    Text::AAlib::_fastrender($self->{_context}, $x1, $y1, $x2, $y2);
+}
+
+sub flush {
+    my $self = shift;
+
+    Text::AAlib::_flush($self->{_context});
+    $self->{is_flushed} = 1;
+}
+
+sub close {
+    my $self = shift;
+
+    Text::AAlib::_close($self->{_context});
+    $self->{is_closed} = 1;
+}
+
+sub DESTROY {
+    my $self = shift;
+
+    if ($self->{is_rendered} == 1) {
+        Text::AAlib::_flush($self->{_context}) unless $self->{is_flushed};
+        Text::AAlib::_close($self->{_context}) unless $self->{is_closed};
+    }
 }
 
 1;
