@@ -9,6 +9,8 @@ use POSIX ();
 
 use XSLoader;
 
+use Text::AAlib::RenderParams;
+
 our $VERSION = '0.01';
 
 XSLoader::load __PACKAGE__, $VERSION;
@@ -133,6 +135,26 @@ Text::AAlib - Perl Binding for AAlib
 
 Text::AAlib is perl binding for AAlib. AAlib is a library for creating
 ascii art(AA).
+
+=head1 INTERFACE
+
+=head2 Class Methods
+
+=head3 C<< Text::AAlib->new(%args) >>
+
+Creates and returns a new Text::AAlib instance.
+
+=head2 Instance Methods
+
+=head3 C<< $aalib->putpixel(%args) >>
+
+=head3 C<< $aalib->puts(%args) >>
+
+=head3 C<< $aalib->fastrender(%args) >>
+
+=head3 C<< $aalib->flush(%args) >>
+
+=head3 C<< $aalib->close(%args) >>
 
 =head1 AUTHOR
 
