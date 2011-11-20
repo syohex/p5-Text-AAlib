@@ -6,30 +6,23 @@
 
 #include <aalib.h>
 
-static int str_to_aa_attr(const char *attr_str)
+static void boot_setup_const(void)
 {
-    int attr = 0; /* default is AA_NORMAL */
+    HV *stash = gv_stashpv("Text::AAlib", 1);
 
-    if (strEQ(attr_str, "NORMAL")) {
-        attr = AA_NORMAL;
-    } else if (strEQ(attr_str, "DIM")) {
-        attr = AA_DIM;
-    } else if (strEQ(attr_str, "BOLD")) {
-        attr = AA_BOLD;
-    } else if (strEQ(attr_str, "BOLDFONT")) {
-        attr = AA_BOLDFONT;
-    } else if (strEQ(attr_str, "REVERSE")) {
-        attr = AA_REVERSE;
-    } else if (strEQ(attr_str, "SPECIAL")) {
-        attr = AA_SPECIAL;
-    } else {
-        croak("no such attribute");
-    }
-
-    return attr;
+    /* enum aa_dithering_mode */
+    newCONSTSUB(stash, "AA_NONE", newSViv(AA_NONE));
+    newCONSTSUB(stash, "AA_ERRORDISTRIB", newSViv(AA_ERRORDISTRIB));
+    newCONSTSUB(stash, "AA_FLOYD_S", newSViv(AA_FLOYD_S));
+    newCONSTSUB(stash, "AA_DITHERTYPES", newSViv(AA_DITHERTYPES));
 }
 
 MODULE = Text::AAlib    PACKAGE = Text::AAlib
+
+PROTOTYPES: disable
+
+BOOT:
+    boot_setup_const();
 
 void
 xs_init(SV *filename, SV *width, SV *height)
@@ -75,12 +68,9 @@ xs_puts(SV *self, SV *x, SV *y, SV *attr, SV *str)
 CODE:
 {
     aa_context *context;
-    int aa_attr;
-
-    aa_attr = str_to_aa_attr(SvPV_nolen(attr));
 
     context = INT2PTR(aa_context*, SvIV(SvRV(self)));
-    aa_puts(context, SvIV(x), SvIV(y), aa_attr, SvPV_nolen(str));
+    aa_puts(context, SvIV(x), SvIV(y), SvIV(attr), SvPV_nolen(str));
 }
 
 void

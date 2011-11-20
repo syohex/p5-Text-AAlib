@@ -64,7 +64,20 @@ sub puts {
         }
     }
 
-    my $attr = delete $args{attribute} || 'normal';
+    my $attr_str = delete $args{attribute} || 'none';
+    $attr_str = lc $attr_str;
+
+    my $attr;
+    if ($attr_str eq 'none') {
+        $attr = Text::AAlib::AA_NONE();
+    } elsif ($attr_str eq 'errordistrib') {
+        $attr = Text::AAlib::AA_DITHERTYPES();
+    } elsif ($attr_str eq 'floyd_s') {
+        $attr = Text::AAlib::AA_FLOYD_S();
+    } else {
+        my $options = "'none' or 'errordistrib' or 'floyd_s'";
+        Carp::croak("'attr' parameter should be $options");
+    }
 
     Text::AAlib::xs_puts($self->{_context}, $args{x}, $args{y},
                          $attr, $args{string});
