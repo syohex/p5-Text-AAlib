@@ -4,6 +4,7 @@ use 5.008_001;
 use strict;
 use warnings;
 
+use Carp ();
 use POSIX ();
 
 use XSLoader;
@@ -36,32 +37,58 @@ sub new {
 }
 
 sub putpixel {
-    my ($self, $x, $y, $color) = @_;
+    my ($self, %args) = @_;
 
-    die "Can't specified 'x' parameter" unless defined $x;
-    die "Can't specified 'y' parameter" unless defined $y;
-    die "Can't specified 'color' parameter" unless defined $color;
+    for my $param (qw/x y color/) {
+        unless (exists $args{$param}) {
+            Carp::croak("missing mandatory parameter '$param'");
+        }
 
-    Text::AAlib::xs_putpixel($self->{_context}, $x, $y, int($color * 256));
+        unless (looks_like_number($args{$param})) {
+            Carp::croak("'$param' parameter shou be Number");
+        }
+    }
+
+    my $color = ($args{color} * 256);
+    Text::AAlib::xs_putpixel($self->{_context}, $args{x}, $args{y}, $color);
 }
 
 sub puts {
-    my ($self, $x, $y, $attr, $str) = @_;
+    my ($self, %args) = @_;
 
-    die "Can't specified 'x' parameter" unless defined $x;
-    die "Can't specified 'y' parameter" unless defined $y;
-    die "Can't specified 'str' parameter" unless defined $str;
+    for my $param (qw/x y string/) {
+        unless (exists $args{$param}) {
+            Carp::croak("missing mandatory parameter '$param'");
+        }
+    }
 
-    Text::AAlib::xs_puts($self->{_context}, $x, $y, $attr, $str);
+    my $attr = delete $args{attribute} || 'normal';
+
+    Text::AAlib::xs_puts($self->{_context}, $args{x}, $args{y},
+                         $attr, $args{string});
 }
 
 sub fastrender {
-    my ($self, $x1, $y1, $x2, $y2) = @_;
+    my ($self, %args) = @_;
 
-    $x1 ||= 0;
-    $y1 ||= 0;
+    for my $param (qw/end_x end_y/) {
+        unless (exists $args{$param}) {
+            Carp::croak("missing mandatory parameter '$param'");
+        }
+    }
 
-    Text::AAlib::xs_fastrender($self->{_context}, $x1, $y1, $x2, $y2);
+    $args{start_x} ||= 0;
+    $args{start_y} ||= 0;
+
+    for my $param (qw/start_x start_y end_x end_y/) {
+        unless (looks_like_number($args{$param})) {
+            Carp::croak("'$param' parameter should be number");
+        }
+    }
+
+    Text::AAlib::xs_fastrender($self->{_context},
+                               $args{start_x}, $args{start_y},
+                               $args{end_x}, $args{end_y});
 }
 
 sub flush {
