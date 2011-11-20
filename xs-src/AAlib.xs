@@ -6,10 +6,33 @@
 
 #include <aalib.h>
 
+static int str_to_aa_attr(const char *attr_str)
+{
+    int attr = 0; /* default is AA_NORMAL */
+
+    if (strEQ(attr_str, "NORMAL")) {
+        attr = AA_NORMAL;
+    } else if (strEQ(attr_str, "DIM")) {
+        attr = AA_DIM;
+    } else if (strEQ(attr_str, "BOLD")) {
+        attr = AA_BOLD;
+    } else if (strEQ(attr_str, "BOLDFONT")) {
+        attr = AA_BOLDFONT;
+    } else if (strEQ(attr_str, "REVERSE")) {
+        attr = AA_REVERSE;
+    } else if (strEQ(attr_str, "SPECIAL")) {
+        attr = AA_SPECIAL;
+    } else {
+        croak("no such attribute");
+    }
+
+    return attr;
+}
+
 MODULE = Text::AAlib    PACKAGE = Text::AAlib
 
 void
-_init(SV *filename, SV *width, SV *height)
+xs_init(SV *filename, SV *width, SV *height)
 CODE:
 {
     aa_context *context;
@@ -38,7 +61,7 @@ CODE:
 }
 
 void
-_putpixel(SV *self, SV *x, SV *y, SV *color)
+xs_putpixel(SV *self, SV *x, SV *y, SV *color)
 CODE:
 {
     aa_context *context;
@@ -48,7 +71,20 @@ CODE:
 }
 
 void
-_fastrender(SV *self, SV *x1, SV *y1, SV *x2, SV *y2)
+xs_puts(SV *self, SV *x, SV *y, SV *attr, SV *str)
+CODE:
+{
+    aa_context *context;
+    int aa_attr;
+
+    aa_attr = str_to_aa_attr(SvPV_nolen(attr));
+
+    context = INT2PTR(aa_context*, SvIV(SvRV(self)));
+    aa_puts(context, SvIV(x), SvIV(y), aa_attr, SvPV_nolen(str));
+}
+
+void
+xs_fastrender(SV *self, SV *x1, SV *y1, SV *x2, SV *y2)
 CODE:
 {
     aa_context *context;
@@ -62,7 +98,7 @@ CODE:
 }
 
 void
-_flush(SV *self)
+xs_flush(SV *self)
 CODE:
 {
     aa_context *context;
@@ -72,7 +108,7 @@ CODE:
 }
 
 void
-_close(SV *self)
+xs_close(SV *self)
 CODE:
 {
     aa_context *context;
