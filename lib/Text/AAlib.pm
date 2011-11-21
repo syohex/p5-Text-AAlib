@@ -6,6 +6,7 @@ use warnings;
 
 use Carp ();
 use POSIX ();
+use Scalar::Util qw(looks_like_number);
 
 use XSLoader;
 
