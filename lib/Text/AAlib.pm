@@ -17,19 +17,23 @@ our $VERSION = '0.01';
 XSLoader::load __PACKAGE__, $VERSION;
 
 sub new {
-    my ($class, $file, $opt) = @_;
+    my ($class, %args) = @_;
+
+    unless (exists $args{file}) {
+        Carp::croak("missing mandatory parameter 'file'");
+    }
 
     my $width;
-    if (exists $opt->{width}) {
-        $width = POSIX::ceil($opt->{width} / 2);
+    if (exists $args{width}) {
+        $width = POSIX::ceil($args{width} / 2);
     }
 
     my $height;
-    if (exists $opt->{height}) {
-        $height = POSIX::ceil($opt->{height} / 2);
+    if (exists $args{height}) {
+        $height = POSIX::ceil($args{height} / 2);
     }
 
-    my $context = Text::AAlib::xs_init($file, $width, $height);
+    my $context = Text::AAlib::xs_init($args{file}, $width, $height);
 
     bless {
         _context    => $context,
