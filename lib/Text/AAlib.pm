@@ -6,7 +6,7 @@ use warnings;
 
 use Carp ();
 use POSIX ();
-use Scalar::Util qw(looks_like_number);
+use Scalar::Util qw(looks_like_number blessed);
 
 use XSLoader;
 
@@ -109,6 +109,39 @@ sub fastrender {
     Text::AAlib::xs_fastrender($self->{_context},
                                $args{start_x}, $args{start_y},
                                $args{end_x}, $args{end_y});
+}
+
+sub render {
+    my ($self, %args) = @_;
+
+    unless (exists $args{render_params}) {
+        Carp::croak("Not specified 'render_params' parameter");
+    }
+
+    for my $param (qw/end_x end_y/) {
+        unless (exists $args{$param}) {
+            Carp::croak("missing mandatory parameter '$param'");
+        }
+    }
+
+    $args{start_x} ||= 0;
+    $args{start_y} ||= 0;
+
+    unless (blessed $args{render_params}
+            && blessed $args{render_params} eq 'Text::AAlib::RenderParams') {
+        Carp::croak("'render_params' parameter should be"
+                    . "is-a Text::AAlib::RenderParams");
+    }
+
+    for my $param (qw/start_x start_y end_x end_y/) {
+        unless (looks_like_number($args{$param})) {
+            Carp::croak("'$param' parameter should be number");
+        }
+    }
+
+    Text::AAlib::xs_render($self->{_context}, $args{render_params},
+                           $args{start_x}, $args{start_y},
+                           $args{end_x}, $args{end_y});
 }
 
 sub flush {

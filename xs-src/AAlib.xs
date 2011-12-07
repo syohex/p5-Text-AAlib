@@ -83,21 +83,14 @@ CODE:
 }
 
 void
-xs_render(struct aa_context *context, HV *renderparams, SV *x1, SV *y1, SV *x2, SV *y2)
+xs_render(struct aa_context *context, struct aa_renderparams ar, \
+          SV *x1, SV *y1, SV *x2, SV *y2)
 CODE:
 {
-    struct aa_renderparams ar;
     IV _x2, _y2;
 
     _x2 = SvOK(x2) ? SvIV(x2) : aa_scrwidth(context);
     _y2 = SvOK(y2) ? SvIV(y2) : aa_scrheight(context);
-
-    ar.bright    = SvIV(*hv_fetchs(renderparams, "bright", 0));
-    ar.contrast  = SvIV(*hv_fetchs(renderparams, "contrast", 0));
-    ar.gamma     = SvNV(*hv_fetchs(renderparams, "gamma", 0));
-    ar.dither    = SvIV(*hv_fetchs(renderparams, "dither", 0));
-    ar.inversion = SvIV(*hv_fetchs(renderparams, "inversion", 0));
-    ar.randomval = SvIV(*hv_fetchs(renderparams, "randomval", 0));
 
     aa_render(context, &ar, SvIV(x1), SvIV(y1), _x2, _y2);
 }
