@@ -1,0 +1,6 @@
+TYPEMAP
+struct aa_context*              T_AA_CONTEXT
+
+INPUT
+T_AA_CONTEXT
+    $var = INT2PTR(aa_context*, SvIV(SvRV($arg)));

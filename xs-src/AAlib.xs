@@ -64,22 +64,17 @@ CODE:
 }
 
 void
-xs_puts(SV *self, SV *x, SV *y, SV *attr, SV *str)
+xs_puts(struct aa_context *context, SV *x, SV *y, SV *attr, SV *str)
 CODE:
 {
-    aa_context *context;
-
-    context = INT2PTR(aa_context*, SvIV(SvRV(self)));
     aa_puts(context, SvIV(x), SvIV(y), SvIV(attr), SvPV_nolen(str));
 }
 
 void
-xs_fastrender(SV *self, SV *x1, SV *y1, SV *x2, SV *y2)
+xs_fastrender(struct aa_context *context, SV *x1, SV *y1, SV *x2, SV *y2)
 CODE:
 {
-    aa_context *context;
     IV _x2, _y2;
-    context = INT2PTR(aa_context*, SvIV(SvRV(self)));
 
     _x2 = SvOK(x2) ? SvIV(x2) : aa_scrwidth(context);
     _y2 = SvOK(y2) ? SvIV(y2) : aa_scrheight(context);
@@ -88,21 +83,35 @@ CODE:
 }
 
 void
-xs_flush(SV *self)
+xs_render(struct aa_context *context, HV *renderparams, SV *x1, SV *y1, SV *x2, SV *y2)
 CODE:
 {
-    aa_context *context;
-    context = INT2PTR(aa_context*, SvIV(SvRV(self)));
+    struct aa_renderparams ar;
+    IV _x2, _y2;
 
+    _x2 = SvOK(x2) ? SvIV(x2) : aa_scrwidth(context);
+    _y2 = SvOK(y2) ? SvIV(y2) : aa_scrheight(context);
+
+    ar.bright    = SvIV(*hv_fetchs(renderparams, "bright", 0));
+    ar.contrast  = SvIV(*hv_fetchs(renderparams, "contrast", 0));
+    ar.gamma     = SvNV(*hv_fetchs(renderparams, "gamma", 0));
+    ar.dither    = SvIV(*hv_fetchs(renderparams, "dither", 0));
+    ar.inversion = SvIV(*hv_fetchs(renderparams, "inversion", 0));
+    ar.randomval = SvIV(*hv_fetchs(renderparams, "randomval", 0));
+
+    aa_render(context, &ar, SvIV(x1), SvIV(y1), _x2, _y2);
+}
+
+void
+xs_flush(struct aa_context *context)
+CODE:
+{
     aa_flush(context);
 }
 
 void
-xs_close(SV *self)
+xs_close(struct aa_context *context)
 CODE:
 {
-    aa_context *context;
-
-    context = INT2PTR(aa_context*, SvIV(SvRV(self)));
     aa_close(context);
 }
