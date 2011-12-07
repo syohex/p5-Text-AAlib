@@ -53,7 +53,8 @@ Text::AAlib::RenderParams - Perl class of C<< struct aa_renderparams >>
 
 =head1 DESCRIPTION
 
-Text::AAlib::RenderParams is
+Text::AAlib::RenderParams is Perl class of C<< struct aa_renderparams >>.
+This structure is used AAlib render functions.
 
 =head1 INTERFACES
 
