@@ -91,12 +91,6 @@ sub puts {
 sub fastrender {
     my ($self, %args) = @_;
 
-    for my $param (qw/end_x end_y/) {
-        unless (exists $args{$param}) {
-            Carp::croak("missing mandatory parameter '$param'");
-        }
-    }
-
     $args{start_x} ||= 0;
     $args{start_y} ||= 0;
 
@@ -116,12 +110,6 @@ sub render {
 
     unless (exists $args{render_params}) {
         Carp::croak("Not specified 'render_params' parameter");
-    }
-
-    for my $param (qw/end_x end_y/) {
-        unless (exists $args{$param}) {
-            Carp::croak("missing mandatory parameter '$param'");
-        }
     }
 
     $args{start_x} ||= 0;
