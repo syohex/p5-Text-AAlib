@@ -4,7 +4,7 @@ struct aa_renderparams          T_AA_RENDERPARAMS
 
 INPUT
 T_AA_CONTEXT
-    $var = INT2PTR(aa_context*, SvIV(SvRV($arg)));
+    $var = INT2PTR(aa_context*, SvIV($arg));
 
 T_AA_RENDERPARAMS
     {
