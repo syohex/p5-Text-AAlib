@@ -4,7 +4,10 @@ struct aa_renderparams          T_AA_RENDERPARAMS
 
 INPUT
 T_AA_CONTEXT
-    $var = INT2PTR(aa_context*, SvIV($arg));
+    {
+        struct xs_aa_info *_a = INT2PTR(struct xs_aa_info*, SvIV($arg));
+        $var = _a->context;
+    }
 
 T_AA_RENDERPARAMS
     {
