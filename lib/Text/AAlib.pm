@@ -36,11 +36,29 @@ sub new {
     my $context = Text::AAlib::xs_init($args{file}, $width, $height);
 
     bless {
-        _context    => $context,
+        _xs_aa_info => $context,
+        width       => $args{width},
+        height      => $args{height},
         is_rendered => 0,
         is_flushed  => 0,
         is_closed   => 0,
     }, $class;
+}
+
+sub _check_width {
+    my ($self, $x) = @_;
+
+    unless ($x >= 0 && $x < $self->{width}) {
+        Carp::croak("'x' param should be 0 <= x < $self->{width}");
+    }
+}
+
+sub _check_height {
+    my ($self, $y) = @_;
+
+    unless ($y >= 0 && $y < $self->{height}) {
+        Carp::croak("'y' param should be 0 <= y < $self->{height}");
+    }
 }
 
 sub putpixel {
@@ -56,8 +74,11 @@ sub putpixel {
         }
     }
 
-    my $color = ($args{color} * 256);
-    Text::AAlib::xs_putpixel($self->{_context}, $args{x}, $args{y}, $color);
+    $self->_check_width($args{x});
+    $self->_check_height($args{y});
+
+    my $color = int(($args{color} * 256));
+    Text::AAlib::xs_putpixel($self->{_xs_aa_info}, $args{x}, $args{y}, $color);
 }
 
 sub puts {
@@ -84,8 +105,32 @@ sub puts {
         Carp::croak("'attr' parameter should be $options");
     }
 
-    Text::AAlib::xs_puts($self->{_context}, $args{x}, $args{y},
+    Text::AAlib::xs_puts($self->{_xs_aa_info}, $args{x}, $args{y},
                          $attr, $args{string});
+}
+
+sub _check_render_area {
+    my ($self, %args) = @_;
+
+    for my $param (qw/start_x start_y/) {
+        unless (looks_like_number($args{$param})) {
+            Carp::croak("'$param' parameter should be number");
+        }
+
+        $self->_check_width($args{start_x});
+        $self->_check_height($args{start_y});
+    }
+
+    for my $param (qw/end_x end_y/) {
+        next unless exists $args{$param};
+
+        unless (looks_like_number($args{$param})) {
+            Carp::croak("'$param' parameter should be number");
+        }
+
+        $self->_check_width($args{end_x});
+        $self->_check_height($args{end_y});
+    }
 }
 
 sub fastrender {
@@ -94,13 +139,9 @@ sub fastrender {
     $args{start_x} ||= 0;
     $args{start_y} ||= 0;
 
-    for my $param (qw/start_x start_y end_x end_y/) {
-        unless (looks_like_number($args{$param})) {
-            Carp::croak("'$param' parameter should be number");
-        }
-    }
+    $self->_check_render_area(%args);
 
-    Text::AAlib::xs_fastrender($self->{_context},
+    Text::AAlib::xs_fastrender($self->{_xs_aa_info},
                                $args{start_x}, $args{start_y},
                                $args{end_x}, $args{end_y});
 }
@@ -115,19 +156,15 @@ sub render {
     $args{start_x} ||= 0;
     $args{start_y} ||= 0;
 
+    $self->_check_render_area(%args);
+
     unless (blessed $args{render_params}
             && blessed $args{render_params} eq 'Text::AAlib::RenderParams') {
         Carp::croak("'render_params' parameter should be"
                     . "is-a Text::AAlib::RenderParams");
     }
 
-    for my $param (qw/start_x start_y end_x end_y/) {
-        unless (looks_like_number($args{$param})) {
-            Carp::croak("'$param' parameter should be number");
-        }
-    }
-
-    Text::AAlib::xs_render($self->{_context}, $args{render_params},
+    Text::AAlib::xs_render($self->{_xs_aa_info}, $args{render_params},
                            $args{start_x}, $args{start_y},
                            $args{end_x}, $args{end_y});
 }
@@ -135,14 +172,14 @@ sub render {
 sub flush {
     my $self = shift;
 
-    Text::AAlib::_flush($self->{_context});
+    Text::AAlib::xs_flush($self->{_xs_aa_info});
     $self->{is_flushed} = 1;
 }
 
 sub close {
     my $self = shift;
 
-    Text::AAlib::xs_close($self->{_context});
+    Text::AAlib::xs_close($self->{_xs_aa_info});
     $self->{is_closed} = 1;
 }
 
@@ -150,9 +187,11 @@ sub DESTROY {
     my $self = shift;
 
     if ($self->{is_rendered} == 1) {
-        Text::AAlib::xs_flush($self->{_context}) unless $self->{is_flushed};
-        Text::AAlib::xs_close($self->{_context}) unless $self->{is_closed};
+        Text::AAlib::xs_flush($self->{_xs_aa_info}) unless $self->{is_flushed};
+        Text::AAlib::xs_close($self->{_xs_aa_info}) unless $self->{is_closed};
     }
+
+    Text::AAlib::xs_DESTROY($self->{_xs_aa_info});
 }
 
 1;
