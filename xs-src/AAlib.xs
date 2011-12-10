@@ -6,6 +6,11 @@
 
 #include <aalib.h>
 
+struct xs_aa_info {
+    aa_context *context;
+    char *filename;
+};
+
 static void boot_setup_const(void)
 {
     HV *stash = gv_stashpv("Text::AAlib", 1);
@@ -31,10 +36,21 @@ CODE:
     aa_context *context;
     aa_savedata save_data;
     struct aa_hardware_params param;
+    struct xs_aa_info *ai;
 
-    save_data.name   = SvPV_nolen(filename);
+    Newx(ai, 1, struct xs_aa_info);
+    if (ai == NULL) {
+        croak("Can't allocate memory(struct xs_aa_info)");
+    }
+
+    Newx(ai->filename, SvLEN(filename), char);
+    if (ai->filename == NULL) {
+        croak("Can't allocate memory(file name)");
+    }
+    Copy(SvPV_nolen(filename), ai->filename, SvLEN(filename), char);
+
+    save_data.name   = ai->filename;
     save_data.format = &aa_text_format;
-
     param = aa_defparams;
 
     if (SvOK(width)) {
@@ -49,17 +65,15 @@ CODE:
         croak("Error aa_init");
     }
 
-    ST(0) = sv_2mortal( newSViv(PTR2IV(context)) );
+    ai->context = context;
+    ST(0) = sv_2mortal( newSViv(PTR2IV(ai)) );
     XSRETURN(1);
 }
 
 void
-xs_putpixel(SV *self, SV *x, SV *y, SV *color)
+xs_putpixel(struct aa_context *context, SV *x, SV *y, SV *color)
 CODE:
 {
-    aa_context *context;
-
-    context = INT2PTR(aa_context*, SvIV(SvRV(self)));
     aa_putpixel(context, SvIV(x), SvIV(y), SvIV(color));
 }
 
@@ -107,4 +121,13 @@ xs_close(struct aa_context *context)
 CODE:
 {
     aa_close(context);
+}
+
+void
+xs_DESTROY(SV *aa_info)
+CODE:
+{
+    struct xs_aa_info *ai = INT2PTR(struct xs_aa_info*, SvIV(aa_info));
+    Safefree(ai->filename);
+    Safefree(ai);
 }
