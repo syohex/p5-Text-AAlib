@@ -11,7 +11,7 @@ my $aa = Text::AAlib->new(
 );
 
 ok $aa, "constructor";
-ok $aa->{_context}, "pointer of struct aa_context*";
+ok $aa->{_xs_aa_info}, "pointer of struct aa_context*";
 for my $key (qw/is_rendered is_flushed is_closed/) {
     ok $aa->{$key} == 0, "initialize '$key' parameter";
 }
