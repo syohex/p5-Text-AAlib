@@ -121,8 +121,11 @@ sub _check_render_area {
             Carp::croak("'$param' parameter should be number");
         }
 
-        $self->_check_width($args{start_x});
-        $self->_check_height($args{start_y});
+        if ($param =~ m/_x$/) {
+            $self->_check_width($args{$param});
+        } else {
+            $self->_check_height($args{$param});
+        }
     }
 
     for my $p (qw/x y/) {
