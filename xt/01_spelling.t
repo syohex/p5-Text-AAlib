@@ -42,3 +42,4 @@ Syohei YOSHIDA
 syohex
 AAlib
 ascii
+randomval
