@@ -26,6 +26,8 @@ sub new {
         Carp::croak("'contrast' parameter is 0..127");
     }
 
+    Text::AAlib::_is_valid_dithering($args{dither});
+
     my $randomval;
     if ($randomval = delete $args{randomval}) {
         unless (looks_like_number($randomval)) {

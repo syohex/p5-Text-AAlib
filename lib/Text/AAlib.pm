@@ -4,6 +4,8 @@ use 5.008_001;
 use strict;
 use warnings;
 
+use base qw/Exporter/;
+
 use Carp ();
 use POSIX ();
 use Scalar::Util qw(looks_like_number blessed);
@@ -13,6 +15,23 @@ use XSLoader;
 use Text::AAlib::RenderParams;
 
 our $VERSION = '0.01';
+
+our @EXPORT_OK = qw(
+    AA_NONE
+    AA_ERRORDISTRIB
+    AA_FLOYD_S
+    AA_DITHERTYPES
+
+    AA_NORMAL
+    AA_BOLD
+    AA_DIM
+    AA_BOLDFONT
+    AA_REVERSE
+);
+
+our %EXPORT_TAGS = (
+    all => \@EXPORT_OK,
+);
 
 XSLoader::load __PACKAGE__, $VERSION;
 
@@ -85,6 +104,27 @@ sub putpixel {
                              $args{x}, $args{y}, $args{color});
 }
 
+sub _is_valid_attribute {
+    my $attr = shift;
+
+    my @attrs = (Text::AAlib::AA_NORMAL(), Text::AAlib::AA_BOLD(),
+                 Text::AAlib::AA_DIM(), Text::AAlib::AA_BOLDFONT(),
+                 Text::AAlib::AA_REVERSE());
+    unless (grep { $attr == $_} @attrs) {
+        Carp::croak("Invalid attribute(not 'enum aa_attribute')");
+    }
+}
+
+sub _is_valid_dithering {
+    my $mode = shift;
+
+    my @ditherings = (Text::AAlib::AA_NONE(), Text::AAlib::AA_ERRORDISTRIB(),
+                 Text::AAlib::AA_FLOYD_S(), Text::AAlib::AA_DITHERTYPES());
+    unless (grep { $mode == $_} @ditherings) {
+        Carp::croak("Invalid dithering mode(not 'enum aa_dithering_mode')");
+    }
+}
+
 sub puts {
     my ($self, %args) = @_;
 
@@ -103,20 +143,8 @@ sub puts {
     $self->_check_width($args{x});
     $self->_check_height($args{y});
 
-    my $attr_str = delete $args{attribute} || 'none';
-    $attr_str = lc $attr_str;
-
-    my $attr;
-    if ($attr_str eq 'none') {
-        $attr = Text::AAlib::AA_NONE();
-    } elsif ($attr_str eq 'errordistrib') {
-        $attr = Text::AAlib::AA_DITHERTYPES();
-    } elsif ($attr_str eq 'floyd_s') {
-        $attr = Text::AAlib::AA_FLOYD_S();
-    } else {
-        my $options = "'none' or 'errordistrib' or 'floyd_s'";
-        Carp::croak("'attribute' parameter should be $options");
-    }
+    my $attr = delete $args{attribute} || Text::AAlib::AA_NONE();
+    _is_valid_attribute($attr);
 
     Text::AAlib::xs_puts($self->{_xs_aa_info}, $args{x}, $args{y},
                          $attr, $args{string});

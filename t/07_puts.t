@@ -2,7 +2,7 @@ use strict;
 use warnings;
 use Test::More;
 
-use Text::AAlib;
+use Text::AAlib qw(:all);
 
 my $aa = Text::AAlib->new(
     file   => 'a.txt',
@@ -60,9 +60,9 @@ like $@, qr/'y' param should be/, "invalid 'y' param(< 0)";
 
 eval {
     $aa->puts(
-        x => 0, y => 0, string => 'a', attribute => 'not_found'
+        x => 0, y => 0, string => 'a', attribute => -1,
     );
 };
-like $@, qr/'attribute' parameter should be/, "invalid 'attribute' param";
+like $@, qr/Invalid attribute/, "invalid 'attribute' param";
 
 done_testing;
