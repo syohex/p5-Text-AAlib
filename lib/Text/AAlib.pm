@@ -268,19 +268,106 @@ ascii art(AA).
 
 Creates and returns a new Text::AAlib instance.
 
+C<%args> is:
+
+=over
+
+=item file :Str
+
+Output file name.
+
+=item width :Int
+
+Width of output file.
+
+=item height :Int
+
+Height of output file.
+
+=back
+
 =head2 Instance Methods
 
 =head3 C<< $aalib->putpixel(%args) >>
 
+=over
+
+=item x :Int
+
+x-coordinate of pixel. C<x> parameter should be 0 E<lt>= C<x> E<lt>= C<width>.
+C<width> is parameter of constructor.
+
+=item y :Int
+
+y-coordinate of pixel. C<y> parameter should be 0 E<lt>= C<y> E<lt>= C<height>.
+C<height> is parameter of constructor.
+
+=item color :Int
+
+Brightness of pixel. C<color> parameter should be 0 E<lt>= C<color> E<lt>= 255.
+
+=back
+
 =head3 C<< $aalib->puts(%args) >>
+
+=over
+
+=item x :Int
+
+x-coordinate.
+
+=item y :Int
+
+y-coordinate
+
+=item string :Str
+
+=item attribute :Enum(enum aa_attribute)
+
+Buffer attribute. This parameter should be AA_NORMAL, AA_BOLD, AA_DIM,
+AA_BOLDFONT, AA_REVERSE.
+
+=back
 
 =head3 C<< $aalib->fastrender(%args) >>
 
+=over
+
+=item start_x :Int = 0
+
+=item start_y :Int = 0
+
+=item end_x :Int = I<width of output>
+
+=item end_y :Int = I<height of output>
+
+=back
+
 =head3 C<< $aalib->render(%args) >>
 
-=head3 C<< $aalib->flush(%args) >>
+=over
 
-=head3 C<< $aalib->close(%args) >>
+=item start_x :Int = 0
+
+=item start_y :Int = 0
+
+=item end_x :Int = I<width of output>
+
+=item end_y :Int = I<height of output>
+
+=item render_params :Text::AAlib::RenderParams
+
+Please see L<Text::AAlib::RenderParams>
+
+=back
+
+=head3 C<< $aalib->flush() >>
+
+Flush buffers.
+
+=head3 C<< $aalib->close() >>
+
+Close AAlib context.
 
 =head1 AUTHOR
 

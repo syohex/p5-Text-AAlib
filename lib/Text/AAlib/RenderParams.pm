@@ -70,13 +70,29 @@ I<%args> might be:
 
 =item bright :Int(0..255)
 
+Brightness of output image.
+
 =item contrast :Int(0..127)
+
+Contrast of output image.
 
 =item gamma :Float
 
-=item dither:Enum{}
+Gamma of output image.
 
-=item inversion
+=item dither:enum(enum aa_dithering_mode)
+
+Dithering mode.
+
+Value may be C<AA_NONE>, C<AA_ERRORDISTRIB>, C<AA_FLOYD_S>, C<AA_DITHERTYPES>.
+
+=item inversion: Bool
+
+Enable/Disable inversion.
+
+=item randomval
+
+Control the random dithering.
 
 =back
 
