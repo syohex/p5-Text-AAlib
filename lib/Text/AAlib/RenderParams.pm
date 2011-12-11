@@ -9,7 +9,7 @@ sub new {
     my ($class, %args) = @_;
 
     for my $param (qw/bright contrast gamma dither inversion/) {
-        unless ($args{$param}) {
+        unless (exists $args{$param}) {
             Carp::croak("missing mandatory parameter '$param'");
         }
 
