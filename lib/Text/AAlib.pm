@@ -112,7 +112,11 @@ sub puts {
 sub _check_render_area {
     my ($self, %args) = @_;
 
-    for my $param (qw/start_x start_y/) {
+    for my $param (qw/start_x start_y end_x end_y/) {
+        if ($param eq 'end_x' || $param eq 'end_y') {
+            next unless exists $args{$param};
+        }
+
         unless (looks_like_number($args{$param})) {
             Carp::croak("'$param' parameter should be number");
         }
@@ -121,15 +125,13 @@ sub _check_render_area {
         $self->_check_height($args{start_y});
     }
 
-    for my $param (qw/end_x end_y/) {
-        next unless exists $args{$param};
-
-        unless (looks_like_number($args{$param})) {
-            Carp::croak("'$param' parameter should be number");
+    for my $p (qw/x y/) {
+        my ($start, $end) = map { $_ . $p } qw/start_ end_/;
+        if (defined $args{$start} && defined $args{$end}) {
+            if ($args{$start} > $args{$end}) {
+                Carp::croak("'$end' parameter less than '$start' parameter");
+            }
         }
-
-        $self->_check_width($args{end_x});
-        $self->_check_height($args{end_y});
     }
 }
 
@@ -229,6 +231,8 @@ Creates and returns a new Text::AAlib instance.
 =head3 C<< $aalib->puts(%args) >>
 
 =head3 C<< $aalib->fastrender(%args) >>
+
+=head3 C<< $aalib->render(%args) >>
 
 =head3 C<< $aalib->flush(%args) >>
 
