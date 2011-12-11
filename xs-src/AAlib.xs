@@ -16,10 +16,17 @@ static void boot_setup_const(void)
     HV *stash = gv_stashpv("Text::AAlib", 1);
 
     /* enum aa_dithering_mode */
-    newCONSTSUB(stash, "AA_NONE", newSViv(AA_NONE));
-    newCONSTSUB(stash, "AA_ERRORDISTRIB", newSViv(AA_ERRORDISTRIB));
-    newCONSTSUB(stash, "AA_FLOYD_S", newSViv(AA_FLOYD_S));
-    newCONSTSUB(stash, "AA_DITHERTYPES", newSViv(AA_DITHERTYPES));
+    newCONSTSUB(stash, "AA_NONE"         , newSViv(AA_NONE));
+    newCONSTSUB(stash, "AA_ERRORDISTRIB" , newSViv(AA_ERRORDISTRIB));
+    newCONSTSUB(stash, "AA_FLOYD_S"      , newSViv(AA_FLOYD_S));
+    newCONSTSUB(stash, "AA_DITHERTYPES"  , newSViv(AA_DITHERTYPES));
+
+    /* enum aa_attribute */
+    newCONSTSUB(stash, "AA_NORMAL"   , newSViv(AA_NORMAL));
+    newCONSTSUB(stash, "AA_BOLD"     , newSViv(AA_BOLD));
+    newCONSTSUB(stash, "AA_DIM"      , newSViv(AA_DIM));
+    newCONSTSUB(stash, "AA_BOLDFONT" , newSViv(AA_BOLDFONT));
+    newCONSTSUB(stash, "AA_REVERSE"  , newSViv(AA_REVERSE));
 }
 
 MODULE = Text::AAlib    PACKAGE = Text::AAlib
