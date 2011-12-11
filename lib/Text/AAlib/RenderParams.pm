@@ -14,7 +14,7 @@ sub new {
         }
 
         unless (looks_like_number($args{$param})) {
-            Carp::croak("'$param' parameter should be Int");
+            Carp::croak("'$param' parameter should be number");
         }
     }
 
@@ -29,7 +29,7 @@ sub new {
     my $randomval;
     if ($randomval = delete $args{randomval}) {
         unless (looks_like_number($randomval)) {
-            Carp::croak("'randomval' parameter should be Int");
+            Carp::croak("'randomval' parameter should be number");
         }
     } else {
         $randomval = 0;
