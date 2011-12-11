@@ -70,15 +70,19 @@ sub putpixel {
         }
 
         unless (looks_like_number($args{$param})) {
-            Carp::croak("'$param' parameter shou be Number");
+            Carp::croak("'$param' parameter should be number");
         }
     }
 
     $self->_check_width($args{x});
     $self->_check_height($args{y});
 
-    my $color = int(($args{color} * 256));
-    Text::AAlib::xs_putpixel($self->{_xs_aa_info}, $args{x}, $args{y}, $color);
+    unless ($args{color} >= 0 && $args{color} <= 255) {
+        Carp::croak("'color' parameter should be 0 <= color <= 255");
+    }
+
+    Text::AAlib::xs_putpixel($self->{_xs_aa_info},
+                             $args{x}, $args{y}, $args{color});
 }
 
 sub puts {
@@ -88,7 +92,16 @@ sub puts {
         unless (exists $args{$param}) {
             Carp::croak("missing mandatory parameter '$param'");
         }
+
+        unless ($param eq 'string') {
+            unless (looks_like_number($args{$param})) {
+                Carp::croak("'$param' parameter should be number");
+            }
+        }
     }
+
+    $self->_check_width($args{x});
+    $self->_check_height($args{y});
 
     my $attr_str = delete $args{attribute} || 'none';
     $attr_str = lc $attr_str;
@@ -102,7 +115,7 @@ sub puts {
         $attr = Text::AAlib::AA_FLOYD_S();
     } else {
         my $options = "'none' or 'errordistrib' or 'floyd_s'";
-        Carp::croak("'attr' parameter should be $options");
+        Carp::croak("'attribute' parameter should be $options");
     }
 
     Text::AAlib::xs_puts($self->{_xs_aa_info}, $args{x}, $args{y},
