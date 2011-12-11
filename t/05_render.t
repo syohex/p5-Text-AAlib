@@ -32,11 +32,11 @@ for my $key (qw/start_x start_y end_x end_y/) {
 
 eval {
     $aa->render(
-        start_x => 101,
+        start_x => 100,
         render_params => $rp,
     );
 };
-like $@, qr/'x' param should be/, "invalid start_x(> width)";
+like $@, qr/'x' param should be/, "invalid start_x(>= width)";
 
 eval {
     $aa->render(
@@ -48,11 +48,11 @@ like $@, qr/'y' param should be/, "invalid start_y(< 0)";
 
 eval {
     $aa->render(
-        start_y => 201,
+        start_y => 200,
         render_params => $rp,
     );
 };
-like $@, qr/'y' param should be/, "invalid start_y(> height)";
+like $@, qr/'y' param should be/, "invalid start_y(>= height)";
 
 eval {
     $aa->render(

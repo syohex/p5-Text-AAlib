@@ -23,10 +23,10 @@ for my $key (qw/start_x start_y end_x end_y/) {
 
 eval {
     $aa->fastrender(
-        start_x => 101,
+        start_x => 100,
     );
 };
-like $@, qr/'x' param should be/, "invalid start_x(> width)";
+like $@, qr/'x' param should be/, "invalid start_x(>= width)";
 
 eval {
     $aa->fastrender(
@@ -37,10 +37,10 @@ like $@, qr/'y' param should be/, "invalid start_y(< 0)";
 
 eval {
     $aa->fastrender(
-        start_y => 201,
+        start_y => 200,
     );
 };
-like $@, qr/'y' param should be/, "invalid start_y(> height)";
+like $@, qr/'y' param should be/, "invalid start_y(>= height)";
 
 eval {
     $aa->fastrender(
