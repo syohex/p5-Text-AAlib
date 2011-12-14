@@ -117,6 +117,13 @@ CODE:
 }
 
 void
+xs_resize(struct aa_context *context)
+CODE:
+{
+    aa_resize(context);
+}
+
+void
 xs_flush(struct aa_context *context)
 CODE:
 {

@@ -215,6 +215,11 @@ sub render {
                            $args{end_x}, $args{end_y});
 }
 
+sub resize {
+    my $self = shift;
+    Text::AAlib::xs_resize($self->{_xs_aa_info});
+}
+
 sub flush {
     my $self = shift;
 
