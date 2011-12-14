@@ -366,6 +366,10 @@ Please see L<Text::AAlib::RenderParams>
 
 =back
 
+=head3 C<< $aalib->resize() >>
+
+Resize buffers at runtime.
+
 =head3 C<< $aalib->flush() >>
 
 Flush buffers.
