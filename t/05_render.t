@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 
 use Text::AAlib;
+use Text::AAlib::RenderParams;
 
 my $aa = Text::AAlib->new(
     file   => 'a.txt',

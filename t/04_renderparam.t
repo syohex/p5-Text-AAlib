@@ -3,6 +3,7 @@ use warnings;
 use Test::More;
 
 use Text::AAlib qw(:all);
+use Text::AAlib::RenderParams;
 
 my $renderparam = Text::AAlib::RenderParams->new(
     bright    => 1,
