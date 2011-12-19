@@ -1,6 +1,7 @@
 TYPEMAP
 struct aa_context*              T_AA_CONTEXT
 struct aa_renderparams          T_AA_RENDERPARAMS
+aa_palette*                     T_AA_PALETTE
 
 INPUT
 T_AA_CONTEXT
@@ -22,4 +23,9 @@ T_AA_RENDERPARAMS
         _ar.randomval = SvIV(*hv_fetchs(_hv, \"randomval\", 0));
 
         $var = _ar;
+    }
+
+T_AA_PALETTE
+    {
+        $var = INT2PTR(aa_palette*, SvIV($arg));
     }
