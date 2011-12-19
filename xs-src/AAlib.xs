@@ -145,3 +145,41 @@ CODE:
     Safefree(ai->filename);
     Safefree(ai);
 }
+
+#
+# aa_palette
+#
+
+void
+xs_palette_init()
+CODE:
+{
+    aa_palette *p;
+    Newx(p, 1, aa_palette);
+
+    ST(0) = sv_2mortal( newSViv(PTR2IV(p)) );
+    XSRETURN(1);
+}
+
+void
+xs_set_palette(aa_palette *p, SV *index, SV *r, SV *g, SV *b)
+CODE:
+{
+    aa_setpalette(*p, SvIV(index), SvIV(r), SvIV(g), SvIV(b));
+}
+
+void
+xs_get_palette(aa_palette *p, SV *index)
+CODE:
+{
+    int val = (*p)[SvIV(index)];
+    ST(0) = sv_2mortal(newSViv(val));
+    XSRETURN(1);
+}
+
+void
+xs_palette_DESTROY(aa_palette *p)
+CODE:
+{
+    Safefree(p);
+}
