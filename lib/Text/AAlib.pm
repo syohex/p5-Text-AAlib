@@ -12,8 +12,6 @@ use Scalar::Util qw(looks_like_number blessed);
 
 use XSLoader;
 
-use Text::AAlib::RenderParams;
-
 our $VERSION = '0.01';
 
 our @EXPORT_OK = qw(

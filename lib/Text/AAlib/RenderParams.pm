@@ -5,6 +5,8 @@ use warnings;
 use Carp ();
 use Scalar::Util qw(looks_like_number);
 
+use Text::AAlib;
+
 sub new {
     my ($class, %args) = @_;
 
