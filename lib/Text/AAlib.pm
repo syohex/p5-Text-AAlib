@@ -8,6 +8,7 @@ use base qw/Exporter/;
 
 use Carp ();
 use POSIX ();
+use File::Temp ();
 use Scalar::Util qw(looks_like_number blessed);
 
 use XSLoader;
@@ -36,8 +37,12 @@ XSLoader::load __PACKAGE__, $VERSION;
 sub new {
     my ($class, %args) = @_;
 
-    unless (exists $args{file}) {
-        Carp::croak("missing mandatory parameter 'file'");
+    my ($file, $temp);
+    if (exists $args{file}) {
+        $file = $args{file};
+    } else {
+        $temp = File::Temp->new;
+        $file = $temp->filename;
     }
 
     my $width;
@@ -50,10 +55,12 @@ sub new {
         $height = POSIX::ceil($args{height} / 2);
     }
 
-    my $context = Text::AAlib::xs_init($args{file}, $width, $height);
+    my $context = Text::AAlib::xs_init($file, $width, $height);
 
     bless {
         _xs_aa_info => $context,
+        _fh         => $temp, # for GC.
+        file        => $file,
         width       => $args{width},
         height      => $args{height},
         is_rendered => 0,
@@ -188,6 +195,8 @@ sub fastrender {
     Text::AAlib::xs_fastrender($self->{_xs_aa_info},
                                $args{start_x}, $args{start_y},
                                $args{end_x}, $args{end_y});
+
+    $self->{is_rendered} = 1;
 }
 
 sub render {
@@ -211,6 +220,8 @@ sub render {
     Text::AAlib::xs_render($self->{_xs_aa_info}, $args{render_params},
                            $args{start_x}, $args{start_y},
                            $args{end_x}, $args{end_y});
+
+    $self->{is_rendered} = 1;
 }
 
 sub resize {
@@ -230,6 +241,24 @@ sub close {
 
     Text::AAlib::xs_close($self->{_xs_aa_info});
     $self->{is_closed} = 1;
+}
+
+sub as_string {
+    my $self = shift;
+
+    unless ($self->{is_rendered}) {
+        Carp::croak("Not rendered yet");
+    }
+
+    $self->flush unless $self->{is_flushed};
+
+    my $content = do {
+        local $/;
+        open my $fh, "<", $self->{file} or die "Can't open $self->{file}: $!";
+        <$fh>;
+    };
+
+    return $content;
 }
 
 sub DESTROY {
