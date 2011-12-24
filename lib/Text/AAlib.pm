@@ -403,6 +403,8 @@ y-coordinate
 
 Image as Imager object
 
+=over
+
 =head3 C<< $aalib->render(%args) :Str >>
 
 Render buffer and return it as plain text.
