@@ -39,7 +39,7 @@ BOOT:
     boot_setup_const();
 
 void
-xs_init(SV *width, SV *height)
+xs_init(SV *width, SV *height, SV *mask)
 CODE:
 {
     aa_context *context;
@@ -51,6 +51,9 @@ CODE:
     }
     if (SvOK(height)) {
         param.height  = SvIV(height);
+    }
+    if (SvOK(mask)) {
+        param.supported = SvIV(mask);
     }
 
     context = aa_init(&mem_d, &param, NULL);

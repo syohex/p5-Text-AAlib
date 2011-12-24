@@ -53,7 +53,9 @@ sub new {
         $height = POSIX::ceil($args{height} / 2);
     }
 
-    my $context = Text::AAlib::xs_init($width, $height);
+    my $mask = delete $args{mask};
+
+    my $context = Text::AAlib::xs_init($width, $height, $mask);
 
     bless {
         _context    => $context,
@@ -345,6 +347,11 @@ Width of output file.
 =item height :Int
 
 Height of output file.
+
+=item mask :Int
+
+Masks for attribute. Supported masks are C<AA_NORMAL_MASK>, C<AA_DIM_MASK>,
+C<AA_BOLD_MASK>, C<AA_BOLDFONT_MASK>, C<AA_REVERSE_MASK>.
 
 =back
 
