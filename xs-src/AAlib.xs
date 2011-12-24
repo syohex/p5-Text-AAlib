@@ -150,6 +150,18 @@ CODE:
 }
 
 void
+xs_image(struct aa_context *context)
+CODE:
+{
+    unsigned char *p;
+
+    p = aa_image(context);
+    if (p == NULL) {
+        croak("No image buffer");
+    }
+}
+
+void
 xs_resize(struct aa_context *context)
 CODE:
 {
