@@ -237,8 +237,8 @@ sub _buffer_to_string_with_attr {
 
     my ($text, $attr) = ($self->{text}, $self->{attr});
     my $str = '';
-    for my $i (0..($width-1)) {
-        for my $j (0..($height-1)) {
+    for my $i (0..($height-1)) {
+        for my $j (0..($width-1)) {
             my $c = chr $text->[$i]->[$j];
             my $attr = $attr->[$i]->[$j];
             if (exists $aa_attrs{$attr}) {
