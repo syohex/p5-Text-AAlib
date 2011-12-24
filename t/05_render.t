@@ -6,7 +6,6 @@ use Text::AAlib;
 use Text::AAlib::RenderParams;
 
 my $aa = Text::AAlib->new(
-    file   => 'a.txt',
     width  => 100,
     height => 200,
 );
