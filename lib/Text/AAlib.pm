@@ -8,8 +8,8 @@ use base qw/Exporter/;
 
 use Carp ();
 use POSIX ();
-use File::Temp ();
 use Scalar::Util qw(looks_like_number blessed);
+use Term::ANSIColor qw(:constants);
 
 use XSLoader;
 
@@ -37,14 +37,6 @@ XSLoader::load __PACKAGE__, $VERSION;
 sub new {
     my ($class, %args) = @_;
 
-    my ($file, $temp);
-    if (exists $args{file}) {
-        $file = $args{file};
-    } else {
-        $temp = File::Temp->new;
-        $file = $temp->filename;
-    }
-
     my $width;
     if (exists $args{width}) {
         $width = POSIX::ceil($args{width} / 2);
@@ -55,16 +47,10 @@ sub new {
         $height = POSIX::ceil($args{height} / 2);
     }
 
-    my $context = Text::AAlib::xs_init($file, $width, $height);
+    my $context = Text::AAlib::xs_init($width, $height);
 
     bless {
-        _xs_aa_info => $context,
-        _fh         => $temp, # for GC.
-        file        => $file,
-        width       => $args{width},
-        height      => $args{height},
-        is_rendered => 0,
-        is_flushed  => 0,
+        _context    => $context,
         is_closed   => 0,
     }, $class;
 }
@@ -72,16 +58,18 @@ sub new {
 sub _check_width {
     my ($self, $x) = @_;
 
-    unless ($x >= 0 && $x < $self->{width}) {
-        Carp::croak("'x' param should be 0 <= x < $self->{width}");
+    my $width = Text::AAlib::xs_render_width($self->{_context});
+    unless ($x >= 0 && $x < $width) {
+        Carp::croak("'x' param should be 0 <= x < $width");
     }
 }
 
 sub _check_height {
     my ($self, $y) = @_;
 
-    unless ($y >= 0 && $y < $self->{height}) {
-        Carp::croak("'y' param should be 0 <= y < $self->{height}");
+    my $height = Text::AAlib::xs_render_height($self->{_context});
+    unless ($y >= 0 && $y < $height) {
+        Carp::croak("'y' param should be 0 <= y < $height");
     }
 }
 
@@ -105,7 +93,7 @@ sub putpixel {
         Carp::croak("'color' parameter should be 0 <= color <= 255");
     }
 
-    Text::AAlib::xs_putpixel($self->{_xs_aa_info},
+    Text::AAlib::xs_putpixel($self->{_context},
                              $args{x}, $args{y}, $args{color});
 }
 
@@ -151,125 +139,162 @@ sub puts {
     my $attr = delete $args{attribute} || Text::AAlib::AA_NONE();
     _is_valid_attribute($attr);
 
-    Text::AAlib::xs_puts($self->{_xs_aa_info}, $args{x}, $args{y},
+    Text::AAlib::xs_puts($self->{_context}, $args{x}, $args{y},
                          $attr, $args{string});
 }
 
-sub _check_render_area {
+sub put_image {
     my ($self, %args) = @_;
 
-    for my $param (qw/start_x start_y end_x end_y/) {
-        if ($param eq 'end_x' || $param eq 'end_y') {
-            next unless exists $args{$param};
-        }
-
-        unless (looks_like_number($args{$param})) {
-            Carp::croak("'$param' parameter should be number");
-        }
-
-        if ($param =~ m/_x$/) {
-            $self->_check_width($args{$param});
-        } else {
-            $self->_check_height($args{$param});
-        }
+    unless (exists $args{image}) {
+        Carp::croak("missing mandatory parameter 'image'");
     }
 
-    for my $p (qw/x y/) {
-        my ($start, $end) = map { $_ . $p } qw/start_ end_/;
-        if (defined $args{$start} && defined $args{$end}) {
-            if ($args{$start} > $args{$end}) {
-                Carp::croak("'$end' parameter less than '$start' parameter");
-            }
+    my $image = delete $args{image};
+    unless (blessed $image && blessed $image eq 'Imager') {
+        Carp::croak("Argument should be is-a Imager");
+    }
+
+    my $start_x = delete $args{start_x} || 0;
+    my $start_y = delete $args{start_y} || 0;
+
+    my ($img_width, $img_height)  = ($image->getwidth, $image->getheight);
+
+    my $render_width  = Text::AAlib::xs_render_width($self->{_context});
+    my $render_height = Text::AAlib::xs_render_height($self->{_context});
+
+    my $end_x = $img_width > $render_width ? $img_width : $render_width;
+    my $end_y = $img_height > $render_height ? $img_height : $render_height;
+
+    for my $i ($start_x..($end_x-1)) {
+        for my $j ($start_y..($end_y-1)) {
+            my $color = $image->getpixel(x => $i, y => $j);
+            my $value = int(($color->hsv)[2] * 255);
+
+            Text::AAlib::xs_putpixel($self->{_context}, $i, $j, $value);
         }
     }
-}
-
-sub fastrender {
-    my ($self, %args) = @_;
-
-    $args{start_x} ||= 0;
-    $args{start_y} ||= 0;
-
-    $self->_check_render_area(%args);
-
-    Text::AAlib::xs_fastrender($self->{_xs_aa_info},
-                               $args{start_x}, $args{start_y},
-                               $args{end_x}, $args{end_y});
-
-    $self->{is_rendered} = 1;
 }
 
 sub render {
     my ($self, %args) = @_;
 
-    unless (exists $args{render_params}) {
-        Carp::croak("Not specified 'render_params' parameter");
+    my $render_width  = Text::AAlib::xs_render_width($self->{_context});
+    my $render_height = Text::AAlib::xs_render_width($self->{_context});
+
+    my $render_param = Text::AAlib::xs_copy_default_parameter();
+    for my $param (qw/bright contrast gamma dither inversion/) {
+        if (exists $args{$param}) {
+            $render_param->{$param} = $args{$param};
+        }
     }
 
-    $args{start_x} ||= 0;
-    $args{start_y} ||= 0;
+    _check_render_param($render_param);
 
-    $self->_check_render_area(%args);
+    Text::AAlib::xs_render($self->{_context}, $render_param,
+                           0, 0, $render_width, $render_height);
 
-    unless (blessed $args{render_params}
-            && blessed $args{render_params} eq 'Text::AAlib::RenderParams') {
-        Carp::croak("'render_params' parameter should be"
-                    . "is-a Text::AAlib::RenderParams");
+    my $text_ref = Text::AAlib::xs_text($self->{_context});
+    my $attr_ref = Text::AAlib::xs_attrs($self->{_context});
+
+    $self->{text} = $text_ref;
+    $self->{attr} = $attr_ref;
+
+    return $self->_text_as_str;
+}
+
+sub as_string {
+    my ($self, $with_attr) = @_;
+
+    if ($with_attr) {
+        return $self->_buffer_to_string_with_attr;
+    } else {
+        return $self->_buffer_to_string;
+    }
+}
+
+sub _buffer_to_string_with_attr {
+    my $self = shift;
+
+    my %aa_attrs;
+    $aa_attrs{ Text::AAlib::AA_BOLD() }    = BOLD;
+    $aa_attrs{ Text::AAlib::AA_DIM() }     = "\x1b[30;1m";
+    $aa_attrs{ Text::AAlib::AA_REVERSE() } = REVERSE;
+
+    my $width  = Text::AAlib::xs_render_width($self->{_context});
+    my $height = Text::AAlib::xs_render_height($self->{_context});
+
+    my ($text, $attr) = ($self->{text}, $self->{attr});
+    my $str = '';
+    for my $i (0..($width-1)) {
+        for my $j (0..($height-1)) {
+            my $c = chr $text->[$i]->[$j];
+            my $attr = $attr->[$i]->[$j];
+            if (exists $aa_attrs{$attr}) {
+                $c = $aa_attrs{$attr} . $c . RESET;
+            }
+            $str .= $c;
+        }
+        $str .= "\n";
     }
 
-    Text::AAlib::xs_render($self->{_xs_aa_info}, $args{render_params},
-                           $args{start_x}, $args{start_y},
-                           $args{end_x}, $args{end_y});
+    return $str;
+}
 
-    $self->{is_rendered} = 1;
+sub _buffer_to_string {
+    my $self = shift;
+
+    my $str = '';
+    for my $row (@{$self->{text}}) {
+        for my $elm (@{$row}) {
+            $str .= chr $elm;
+        }
+        $str .= "\n";
+    }
+
+    return $str;
+}
+
+sub _check_render_param {
+    my $rp = shift;
+
+    unless ($rp->{bright} >= 0 && $rp->{bright} <= 255) {
+        Carp::croak("'bright' parameter is 0..255");
+    }
+
+    unless ($rp->{contrast} >= 0 && $rp->{contrast} <= 127) {
+        Carp::croak("'contrast' parameter is 0..127");
+    }
 }
 
 sub resize {
     my $self = shift;
-    Text::AAlib::xs_resize($self->{_xs_aa_info});
+    Text::AAlib::xs_resize($self->{_context});
 }
 
 sub flush {
     my $self = shift;
 
-    Text::AAlib::xs_flush($self->{_xs_aa_info});
-    $self->{is_flushed} = 1;
+    Text::AAlib::xs_flush($self->{_context});
 }
 
 sub close {
     my $self = shift;
 
-    Text::AAlib::xs_close($self->{_xs_aa_info});
+    Text::AAlib::xs_close($self->{_context});
     $self->{is_closed} = 1;
-}
-
-sub as_string {
-    my $self = shift;
-
-    unless ($self->{is_rendered}) {
-        Carp::croak("Not rendered yet");
-    }
-
-    $self->flush unless $self->{is_flushed};
-
-    my $content = do {
-        local $/;
-        open my $fh, "<", $self->{file} or die "Can't open $self->{file}: $!";
-        <$fh>;
-    };
-
-    return $content;
 }
 
 sub DESTROY {
     my $self = shift;
 
-    if ($self->{is_rendered} == 1) {
-        Text::AAlib::xs_flush($self->{_xs_aa_info}) unless $self->{is_flushed};
-        Text::AAlib::xs_close($self->{_xs_aa_info}) unless $self->{is_closed};
+    unless ($self->{_context}) {
+        Carp::croak("Not initialized");
     }
 
-    Text::AAlib::xs_DESTROY($self->{_xs_aa_info});
+    unless ($self->{is_closed}) {
+        Text::AAlib::xs_close($self->{_context});
+    }
 }
 
 1;
@@ -303,10 +328,6 @@ Creates and returns a new Text::AAlib instance.
 C<%args> is:
 
 =over
-
-=item file :Str
-
-Output file name.
 
 =item width :Int
 
@@ -361,37 +382,29 @@ AA_BOLDFONT, AA_REVERSE.
 
 =back
 
-=head3 C<< $aalib->fastrender(%args) >>
+=head3 C<< $aalib->render(%args) :Str >>
+
+Render buffer and return it as plain text.
+You can specify render parameter following
 
 =over
 
-=item start_x :Int = 0
+=item bright :Int
 
-=item start_y :Int = 0
+=item contrast :Int
 
-=item end_x :Int = I<width of output>
+=item gamma :Float
 
-=item end_y :Int = I<height of output>
+=item dither :Enum
 
-=back
-
-=head3 C<< $aalib->render(%args) >>
-
-=over
-
-=item start_x :Int = 0
-
-=item start_y :Int = 0
-
-=item end_x :Int = I<width of output>
-
-=item end_y :Int = I<height of output>
-
-=item render_params :Text::AAlib::RenderParams
-
-Please see L<Text::AAlib::RenderParams>
+=item inversion :Int
 
 =back
+
+=head3 C<< $aalib->as_string($with_attr) :Str >>
+
+Return AA as string.
+If C<$with_attr> is true, text attribute(BOLD, DIM REVERSE) is enable.
 
 =head3 C<< $aalib->resize() >>
 
@@ -421,5 +434,7 @@ it under the same terms as Perl itself.
 =head1 SEE ALSO
 
 L<http://aa-project.sourceforge.net/aalib/>
+
+L<http://jwilk.net/software/python-aalib>
 
 =cut
