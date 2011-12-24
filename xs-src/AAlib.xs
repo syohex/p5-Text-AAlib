@@ -6,11 +6,6 @@
 
 #include <aalib.h>
 
-struct xs_aa_info {
-    aa_context *context;
-    char *filename;
-};
-
 static void boot_setup_const(void)
 {
     HV *stash = gv_stashpv("Text::AAlib", 1);
@@ -37,29 +32,13 @@ BOOT:
     boot_setup_const();
 
 void
-xs_init(SV *filename, SV *width, SV *height)
+xs_init(SV *width, SV *height)
 CODE:
 {
     aa_context *context;
-    aa_savedata save_data;
     struct aa_hardware_params param;
-    struct xs_aa_info *ai;
 
-    Newx(ai, 1, struct xs_aa_info);
-    if (ai == NULL) {
-        croak("Can't allocate memory(struct xs_aa_info)");
-    }
-
-    Newx(ai->filename, SvLEN(filename), char);
-    if (ai->filename == NULL) {
-        croak("Can't allocate memory(file name)");
-    }
-    Copy(SvPV_nolen(filename), ai->filename, SvLEN(filename), char);
-
-    save_data.name   = ai->filename;
-    save_data.format = &aa_text_format;
     param = aa_defparams;
-
     if (SvOK(width)) {
         param.width  = SvIV(width);
     }
@@ -67,13 +46,30 @@ CODE:
         param.height  = SvIV(height);
     }
 
-    context = aa_init(&save_d, &param, (const void*)&save_data);
+    context = aa_init(&mem_d, &param, NULL);
     if (context == NULL) {
         croak("Error aa_init");
     }
 
-    ai->context = context;
-    ST(0) = sv_2mortal( newSViv(PTR2IV(ai)) );
+    ST(0) = sv_2mortal( newSViv(PTR2IV(context)) );
+    XSRETURN(1);
+}
+
+void
+xs_copy_default_parameter()
+CODE:
+{
+    HV * h;
+    h = (HV*)sv_2mortal((SV*)newHV());
+
+    (void)hv_store(h, "bright",    6, newSViv(aa_defrenderparams.bright), 0);
+    (void)hv_store(h, "contrast",  8, newSViv(aa_defrenderparams.contrast), 0);
+    (void)hv_store(h, "gamma",     5, newSVnv(aa_defrenderparams.gamma), 0);
+    (void)hv_store(h, "dither",    6, newSViv(aa_defrenderparams.dither), 0);
+    (void)hv_store(h, "inversion", 9, newSViv(aa_defrenderparams.inversion), 0);
+    (void)hv_store(h, "randomval", 9, newSViv(aa_defrenderparams.randomval), 0);
+
+    ST(0) = newRV((SV*)h);
     XSRETURN(1);
 }
 
@@ -92,28 +88,65 @@ CODE:
 }
 
 void
-xs_fastrender(struct aa_context *context, SV *x1, SV *y1, SV *x2, SV *y2)
-CODE:
-{
-    IV _x2, _y2;
-
-    _x2 = SvOK(x2) ? SvIV(x2) : aa_scrwidth(context);
-    _y2 = SvOK(y2) ? SvIV(y2) : aa_scrheight(context);
-
-    aa_fastrender(context, SvIV(x1), SvIV(y1), _x2, _y2);
-}
-
-void
 xs_render(struct aa_context *context, struct aa_renderparams ar, \
           SV *x1, SV *y1, SV *x2, SV *y2)
 CODE:
 {
-    IV _x2, _y2;
+    aa_render(context, &ar, SvIV(x1), SvIV(y1), SvIV(x2), SvIV(y2));
+}
 
-    _x2 = SvOK(x2) ? SvIV(x2) : aa_scrwidth(context);
-    _y2 = SvOK(y2) ? SvIV(y2) : aa_scrheight(context);
+void
+xs_text(struct aa_context *context)
+CODE:
+{
+    AV *text_array;
+    int width, height;
+    int i, j;
+    unsigned char *text;
 
-    aa_render(context, &ar, SvIV(x1), SvIV(y1), _x2, _y2);
+    text_array = (AV*)sv_2mortal((SV*)newAV());
+
+    width  = aa_scrwidth(context);
+    height = aa_scrheight(context);
+
+    text = aa_text(context);
+    for (i = 0; i < height; i++) {
+        AV *row = newAV();
+        for (j = 0; j < width; j++) {
+            av_push(row, newSViv(text[i * width + j]));
+        }
+        av_push(text_array, newRV((SV*)row));
+    }
+
+    ST(0) = (SV*)newRV((SV*)text_array);
+    XSRETURN(1);
+}
+
+void
+xs_attrs(struct aa_context *context)
+CODE:
+{
+    AV *attr_array;
+    int width, height;
+    int i, j;
+    unsigned char *attr;
+
+    attr_array = (AV*)sv_2mortal((SV*)newAV());
+
+    width  = aa_scrwidth(context);
+    height = aa_scrheight(context);
+
+    attr = aa_attrs(context);
+    for (i = 0; i < height; i++) {
+        AV *row = newAV();
+        for (j = 0; j < width; j++) {
+            av_push(row, newSViv(attr[i * width + j]));
+        }
+        av_push(attr_array, newRV((SV*)row));
+    }
+
+    ST(0) = (SV*)newRV((SV*)attr_array);
+    XSRETURN(1);
 }
 
 void
@@ -138,48 +171,17 @@ CODE:
 }
 
 void
-xs_DESTROY(SV *aa_info)
+xs_render_width(struct aa_context *context)
 CODE:
 {
-    struct xs_aa_info *ai = INT2PTR(struct xs_aa_info*, SvIV(aa_info));
-    Safefree(ai->filename);
-    Safefree(ai);
-}
-
-#
-# aa_palette
-#
-
-void
-xs_palette_init()
-CODE:
-{
-    aa_palette *p;
-    Newx(p, 1, aa_palette);
-
-    ST(0) = sv_2mortal( newSViv(PTR2IV(p)) );
+    ST(0) = sv_2mortal( newSViv( aa_scrwidth(context)) );
     XSRETURN(1);
 }
 
 void
-xs_set_palette(aa_palette *p, SV *index, SV *r, SV *g, SV *b)
+xs_render_height(struct aa_context *context)
 CODE:
 {
-    aa_setpalette(*p, SvIV(index), SvIV(r), SvIV(g), SvIV(b));
-}
-
-void
-xs_get_palette(aa_palette *p, SV *index)
-CODE:
-{
-    int val = (*p)[SvIV(index)];
-    ST(0) = sv_2mortal(newSViv(val));
+    ST(0) = sv_2mortal( newSViv( aa_scrheight(context)) );
     XSRETURN(1);
-}
-
-void
-xs_palette_DESTROY(aa_palette *p)
-CODE:
-{
-    Safefree(p);
 }
