@@ -155,8 +155,8 @@ sub put_image {
         Carp::croak("Argument should be is-a Imager");
     }
 
-    my $start_x = delete $args{start_x} || 0;
-    my $start_y = delete $args{start_y} || 0;
+    my $start_x = delete $args{x} || 0;
+    my $start_y = delete $args{y} || 0;
 
     my ($img_width, $img_height)  = ($image->getwidth, $image->getheight);
 
@@ -378,12 +378,30 @@ y-coordinate
 
 =item string :Str
 
+String set
+
 =item attribute :Enum(enum aa_attribute)
 
 Buffer attribute. This parameter should be AA_NORMAL, AA_BOLD, AA_DIM,
 AA_BOLDFONT, AA_REVERSE.
 
 =back
+
+=head3 C<< $aalib->put_image(%args) >>
+
+=over
+
+=item x :Int
+
+x-coordinate.
+
+=item y :Int
+
+y-coordinate
+
+=item image :Imager
+
+Image as Imager object
 
 =head3 C<< $aalib->render(%args) :Str >>
 
