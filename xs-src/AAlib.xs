@@ -22,6 +22,13 @@ static void boot_setup_const(void)
     newCONSTSUB(stash, "AA_DIM"      , newSViv(AA_DIM));
     newCONSTSUB(stash, "AA_BOLDFONT" , newSViv(AA_BOLDFONT));
     newCONSTSUB(stash, "AA_REVERSE"  , newSViv(AA_REVERSE));
+
+    /* masks for attibute */
+    newCONSTSUB(stash, "AA_NORMAL_MASK"   , newSViv(AA_NORMAL_MASK));
+    newCONSTSUB(stash, "AA_DIM_MASK"      , newSViv(AA_DIM_MASK));
+    newCONSTSUB(stash, "AA_BOLD_MASK"     , newSViv(AA_BOLD_MASK));
+    newCONSTSUB(stash, "AA_BOLDFONT_MASK" , newSViv(AA_BOLDFONT_MASK));
+    newCONSTSUB(stash, "AA_REVERSE_MASK"  , newSViv(AA_REVERSE_MASK));
 }
 
 MODULE = Text::AAlib    PACKAGE = Text::AAlib

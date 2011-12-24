@@ -26,6 +26,12 @@ our @EXPORT_OK = qw(
     AA_DIM
     AA_BOLDFONT
     AA_REVERSE
+
+    AA_NORMAL_MASK
+    AA_DIM_MASK
+    AA_BOLD_MASK
+    AA_BOLDFONT_MASK
+    AA_REVERSE_MASK
 );
 
 our %EXPORT_TAGS = (
@@ -403,7 +409,7 @@ y-coordinate
 
 Image as Imager object
 
-=over
+=back
 
 =head3 C<< $aalib->render(%args) :Str >>
 
