@@ -207,3 +207,19 @@ CODE:
     ST(0) = sv_2mortal( newSViv( aa_scrheight(context)) );
     XSRETURN(1);
 }
+
+void
+xs_imgwidth(struct aa_context *context)
+CODE:
+{
+    ST(0) = sv_2mortal( newSViv( aa_imgwidth(context)) );
+    XSRETURN(1);
+}
+
+void
+xs_imgheight(struct aa_context *context)
+CODE:
+{
+    ST(0) = sv_2mortal( newSViv( aa_imgheight(context)) );
+    XSRETURN(1);
+}
