@@ -55,7 +55,7 @@ sub new {
 
     my $mask = delete $args{mask};
 
-    my $context = Text::AAlib::xs_init($width, $height, $mask);
+    my $context = xs_init($width, $height, $mask);
 
     bless {
         _context    => $context,
@@ -66,7 +66,7 @@ sub new {
 sub _check_width {
     my ($self, $x) = @_;
 
-    my $width = Text::AAlib::xs_render_width($self->{_context});
+    my $width = xs_imgwidth($self->{_context});
     unless ($x >= 0 && $x < $width) {
         Carp::croak("'x' param should be 0 <= x < $width");
     }
@@ -75,7 +75,7 @@ sub _check_width {
 sub _check_height {
     my ($self, $y) = @_;
 
-    my $height = Text::AAlib::xs_render_height($self->{_context});
+    my $height = xs_imgheight($self->{_context});
     unless ($y >= 0 && $y < $height) {
         Carp::croak("'y' param should be 0 <= y < $height");
     }
@@ -108,9 +108,7 @@ sub putpixel {
 sub _is_valid_attribute {
     my $attr = shift;
 
-    my @attrs = (Text::AAlib::AA_NORMAL(), Text::AAlib::AA_BOLD(),
-                 Text::AAlib::AA_DIM(), Text::AAlib::AA_BOLDFONT(),
-                 Text::AAlib::AA_REVERSE());
+    my @attrs = (AA_NORMAL(), AA_BOLD(), AA_DIM(), AA_BOLDFONT(), AA_REVERSE());
     unless (grep { $attr == $_} @attrs) {
         Carp::croak("Invalid attribute(not 'enum aa_attribute')");
     }
@@ -119,8 +117,8 @@ sub _is_valid_attribute {
 sub _is_valid_dithering {
     my $mode = shift;
 
-    my @ditherings = (Text::AAlib::AA_NONE(), Text::AAlib::AA_ERRORDISTRIB(),
-                 Text::AAlib::AA_FLOYD_S(), Text::AAlib::AA_DITHERTYPES());
+    my @ditherings = (AA_NONE(), AA_ERRORDISTRIB(),
+                      AA_FLOYD_S(), AA_DITHERTYPES());
     unless (grep { $mode == $_} @ditherings) {
         Carp::croak("Invalid dithering mode(not 'enum aa_dithering_mode')");
     }
@@ -147,8 +145,7 @@ sub puts {
     my $attr = delete $args{attribute} || Text::AAlib::AA_NONE();
     _is_valid_attribute($attr);
 
-    Text::AAlib::xs_puts($self->{_context}, $args{x}, $args{y},
-                         $attr, $args{string});
+    xs_puts($self->{_context}, $args{x}, $args{y}, $attr, $args{string});
 }
 
 sub put_image {
@@ -168,18 +165,18 @@ sub put_image {
 
     my ($img_width, $img_height)  = ($image->getwidth, $image->getheight);
 
-    my $render_width  = Text::AAlib::xs_render_width($self->{_context});
-    my $render_height = Text::AAlib::xs_render_height($self->{_context});
+    my $width  = xs_imgwidth($self->{_context});
+    my $height = xs_imgheight($self->{_context});
 
-    my $end_x = $img_width > $render_width ? $img_width : $render_width;
-    my $end_y = $img_height > $render_height ? $img_height : $render_height;
+    my $end_x = $img_width > $width ? $img_width : $width;
+    my $end_y = $img_height > $height ? $img_height : $height;
 
     for my $i ($start_x..($end_x-1)) {
         for my $j ($start_y..($end_y-1)) {
             my $color = $image->getpixel(x => $i, y => $j);
             my $value = int(($color->hsv)[2] * 255);
 
-            Text::AAlib::xs_putpixel($self->{_context}, $i, $j, $value);
+            xs_putpixel($self->{_context}, $i, $j, $value);
         }
     }
 }
@@ -187,10 +184,7 @@ sub put_image {
 sub render {
     my ($self, %args) = @_;
 
-    my $render_width  = Text::AAlib::xs_render_width($self->{_context});
-    my $render_height = Text::AAlib::xs_render_width($self->{_context});
-
-    my $render_param = Text::AAlib::xs_copy_default_parameter();
+    my $render_param = xs_copy_default_parameter();
     for my $param (qw/bright contrast gamma dither inversion/) {
         if (exists $args{$param}) {
             $render_param->{$param} = $args{$param};
@@ -199,11 +193,13 @@ sub render {
 
     _check_render_param($render_param);
 
-    Text::AAlib::xs_render($self->{_context}, $render_param,
-                           0, 0, $render_width, $render_height);
+    my $width  = xs_render_width($self->{_context});
+    my $height = xs_render_height($self->{_context});
 
-    my $text_ref = Text::AAlib::xs_text($self->{_context});
-    my $attr_ref = Text::AAlib::xs_attrs($self->{_context});
+    xs_render($self->{_context}, $render_param, 0, 0, $width, $height);
+
+    my $text_ref = xs_text($self->{_context});
+    my $attr_ref = xs_attrs($self->{_context});
 
     $self->{text} = $text_ref;
     $self->{attr} = $attr_ref;
@@ -215,7 +211,7 @@ sub as_string {
     my ($self, $with_attr) = @_;
 
     # check that image buffer is already created.
-    Text::AAlib::xs_image($self->{_context});
+    xs_image($self->{_context});
 
     if ($with_attr) {
         return $self->_buffer_to_string_with_attr;
@@ -228,12 +224,12 @@ sub _buffer_to_string_with_attr {
     my $self = shift;
 
     my %aa_attrs;
-    $aa_attrs{ Text::AAlib::AA_BOLD() }    = BOLD;
-    $aa_attrs{ Text::AAlib::AA_DIM() }     = "\x1b[30;1m";
-    $aa_attrs{ Text::AAlib::AA_REVERSE() } = REVERSE;
+    $aa_attrs{ AA_BOLD() }    = BOLD;
+    $aa_attrs{ AA_DIM() }     = "\x1b[30;1m";
+    $aa_attrs{ AA_REVERSE() } = REVERSE;
 
-    my $width  = Text::AAlib::xs_render_width($self->{_context});
-    my $height = Text::AAlib::xs_render_height($self->{_context});
+    my $width  = xs_render_width($self->{_context});
+    my $height = xs_render_height($self->{_context});
 
     my ($text, $attr) = ($self->{text}, $self->{attr});
     my $str = '';
@@ -280,19 +276,19 @@ sub _check_render_param {
 
 sub resize {
     my $self = shift;
-    Text::AAlib::xs_resize($self->{_context});
+    xs_resize($self->{_context});
 }
 
 sub flush {
     my $self = shift;
 
-    Text::AAlib::xs_flush($self->{_context});
+    xs_flush($self->{_context});
 }
 
 sub close {
     my $self = shift;
 
-    Text::AAlib::xs_close($self->{_context});
+    xs_close($self->{_context});
     $self->{is_closed} = 1;
 }
 
@@ -304,7 +300,7 @@ sub DESTROY {
     }
 
     unless ($self->{is_closed}) {
-        Text::AAlib::xs_close($self->{_context});
+        xs_close($self->{_context});
     }
 }
 
