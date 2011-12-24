@@ -200,7 +200,7 @@ sub render {
     $self->{text} = $text_ref;
     $self->{attr} = $attr_ref;
 
-    return $self->_text_as_str;
+    return $self->_buffer_to_string;
 }
 
 sub as_string {
