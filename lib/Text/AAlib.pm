@@ -206,6 +206,9 @@ sub render {
 sub as_string {
     my ($self, $with_attr) = @_;
 
+    # check that image buffer is already created.
+    Text::AAlib::xs_image($self->{_context});
+
     if ($with_attr) {
         return $self->_buffer_to_string_with_attr;
     } else {
