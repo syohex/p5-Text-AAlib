@@ -174,8 +174,12 @@ sub put_image {
     for my $i ($start_x..($end_x-1)) {
         for my $j ($start_y..($end_y-1)) {
             my $color = $image->getpixel(x => $i, y => $j);
-            my $value = int(($color->hsv)[2] * 255);
-
+            my $value;
+            if (defined $color) {
+                $value = int(($color->hsv)[2] * 255)
+            } else {
+                $value = 0;
+            }
             xs_putpixel($self->{_context}, $i, $j, $value);
         }
     }
