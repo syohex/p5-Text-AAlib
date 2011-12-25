@@ -25,6 +25,7 @@ t/05_puts.t
 t/06_flush.t
 t/07_close.t
 t/08_resize.t
+t/09_as_string.t
 xs-src/AAlib.xs
 xs-src/typemap
 xt/01_spelling.t
