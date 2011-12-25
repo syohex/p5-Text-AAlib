@@ -41,6 +41,7 @@ __DATA__
 Syohei YOSHIDA
 syohex
 AAlib
+aalib
 ascii
 randomval
 AA
