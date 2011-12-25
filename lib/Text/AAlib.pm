@@ -53,7 +53,7 @@ sub new {
         $height = POSIX::ceil($args{height} / 2);
     }
 
-    my $mask = delete $args{mask};
+    my $mask = delete $args{mask} || AA_NORMAL_MASK();
 
     my $context = xs_init($width, $height, $mask);
 
