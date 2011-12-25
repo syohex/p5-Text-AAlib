@@ -469,7 +469,7 @@ it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<http://aa-project.sourceforge.net/aalib/>
+Some idea are taken from python-aalib. L<http://aa-project.sourceforge.net/aalib/>
 
 L<http://jwilk.net/software/python-aalib>
 
