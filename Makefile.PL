@@ -7,6 +7,9 @@ all_from 'lib/Text/AAlib.pm';
 
 test_requires 'Test::More' => '0.88';
 
+requires "Term::ANSIColor";
+recommends "Imager" => '0.81';
+
 cc_warnings;
 cc_append_to_libs '-laa';
 
