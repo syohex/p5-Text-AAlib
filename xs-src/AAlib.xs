@@ -175,7 +175,9 @@ void
 xs_resize(struct aa_context *context)
 CODE:
 {
-    aa_resize(context);
+    if (aa_resize(context) == 0) {
+        warn("no resize");
+    }
 }
 
 void
