@@ -456,7 +456,7 @@ You can specify render parameter following
 =head3 C<< $aalib->as_string($with_attr) :Str >>
 
 Return AA as string.
-If C<$with_attr> is true, text attribute(BOLD, DIM REVERSE) is enable.
+If C<$with_attr> is true, text attribute(BOLD, DIM, REVERSE) is enable.
 
 =head3 C<< $aalib->resize() >>
 
