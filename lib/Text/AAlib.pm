@@ -163,6 +163,9 @@ sub put_image {
     my $start_x = delete $args{x} || 0;
     my $start_y = delete $args{y} || 0;
 
+    $self->_check_width($start_x);
+    $self->_check_height($start_y);
+
     my ($img_width, $img_height)  = ($image->getwidth, $image->getheight);
 
     my $width  = xs_imgwidth($self->{_context});
@@ -404,11 +407,11 @@ AA_BOLDFONT, AA_REVERSE.
 
 =over
 
-=item x :Int
+=item x :Int = 0
 
 x-coordinate.
 
-=item y :Int
+=item y :Int = 0
 
 y-coordinate
 
