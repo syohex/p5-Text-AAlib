@@ -325,6 +325,19 @@ Text::AAlib - Perl Binding for AAlib
 =head1 SYNOPSIS
 
   use Text::AAlib;
+  use Imager;
+
+  my $img = Imager->new( file => 'sample.jpg' );
+  my ($width, $height) = ($img->getwidth, $img->getheight);
+
+  my $aa = Text::AAlib->new(
+      width  => $width,
+      height => $height,
+      mask   => AA_REVERSE_MASK,
+  );
+
+  $aa->put_image(image => $img);
+  print $aa->render();
 
 =head1 DESCRIPTION
 
