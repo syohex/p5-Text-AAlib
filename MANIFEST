@@ -1,5 +1,6 @@
 .gitignore
 Changes
+eg/perl_logo_aa.pl
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
 inc/Module/Install/Base.pm
@@ -26,6 +27,7 @@ t/06_flush.t
 t/07_close.t
 t/08_resize.t
 t/09_as_string.t
+t/10_put_image.t
 xs-src/AAlib.xs
 xs-src/typemap
 xt/01_spelling.t
