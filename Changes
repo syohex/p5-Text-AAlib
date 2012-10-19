@@ -1,4 +1,7 @@
 Revision history for Perl extension Text::AAlib
 
+0.02  2012-10-20
+        - Bump Module::Install version
+
 0.01  2011-11-06
         - original version
