@@ -1,9 +1,12 @@
 use inc::Module::Install;
 use Module::Install::AuthorTests;
 use Module::Install::XSUtil;
+use Module::Install::CheckLib;
 
 name 'Text-AAlib';
 all_from 'lib/Text/AAlib.pm';
+
+checklibs lib => 'aa', header => 'aalib.h';
 
 test_requires 'Test::More' => '0.88';
 
