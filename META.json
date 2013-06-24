@@ -21,15 +21,14 @@
          "share",
          "eg",
          "examples",
-         "author"
+         "author",
+         "benchmark",
+         "builder"
       ]
    },
    "prereqs" : {
       "build" : {
          "requires" : {
-            "Devel::PPPort" : "3.2",
-            "ExtUtils::MakeMaker" : "6.59",
-            "ExtUtils::ParseXS" : "2.21",
             "Test::More" : "0.88"
          }
       },
@@ -37,7 +36,9 @@
          "requires" : {
             "CPAN::Meta" : "0",
             "CPAN::Meta::Prereqs" : "0",
-            "Module::Build" : "0.38"
+            "Devel::CheckLib" : "0",
+            "Module::Build" : "0.38",
+            "Module::Build::XSUtil" : "0.02"
          }
       },
       "develop" : {
