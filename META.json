@@ -64,7 +64,8 @@
       },
       "homepage" : "https://github.com/syohex/p5-Text-AAlib",
       "repository" : {
-         "url" : "https://github.com/syohex/p5-Text-AAlib",
+         "type" : "git",
+         "url" : "git://github.com/syohex/p5-Text-AAlib.git",
          "web" : "https://github.com/syohex/p5-Text-AAlib"
       }
    },
