@@ -9,5 +9,5 @@ on build => sub {
 on configure => sub {
     requires 'Module::Build::XSUtil', '>=0.02';
     requires 'Devel::CheckLib';
+    requires 'File::Which';
 };
-
