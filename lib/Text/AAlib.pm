@@ -13,7 +13,7 @@ use Term::ANSIColor qw(:constants);
 
 use XSLoader;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 our @EXPORT_OK = qw(
     AA_NONE

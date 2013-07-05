@@ -4,7 +4,7 @@
       "Syohei YOSHIDA <syohex@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v0.5.3, CPAN::Meta::Converter version 2.131560",
+   "generated_by" : "Minilla/v0.5.5, CPAN::Meta::Converter version 2.131560",
    "license" : [
       "perl_5"
    ],
@@ -37,6 +37,7 @@
             "CPAN::Meta" : "0",
             "CPAN::Meta::Prereqs" : "0",
             "Devel::CheckLib" : "0",
+            "File::Which" : "0",
             "Module::Build" : "0.38",
             "Module::Build::XSUtil" : "0.02"
          }
@@ -69,5 +70,5 @@
          "web" : "https://github.com/syohex/p5-Text-AAlib"
       }
    },
-   "version" : "0.05"
+   "version" : "0.06"
 }
