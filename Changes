@@ -1,6 +1,7 @@
 Revision history for Perl extension Text::AAlib
 
 {{$NEXT}}
+        - Fix configure dependency
 
 0.05 2013-07-01T01:58:07Z
         - Improve dependency checking(Reported by tehmoth)
