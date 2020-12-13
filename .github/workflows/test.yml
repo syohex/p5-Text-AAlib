@@ -1,0 +1,25 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        perl: [ '5.32', '5.30', '5.10' ]
+    name: Perl ${{ matrix.perl }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: ${{ matrix.perl }}
+      - name: Install dependencies
+        run: sudo apt install libaa1-dev
+      - run: perl -V
+      - run: cpanm --installdeps --with-develop --with-configure -n .
+      - run: perl Build.PL
+      - run: ./Build
+      - run: ./Build test

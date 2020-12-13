@@ -18,3 +18,7 @@ ppport.h
 !Build/
 !META.json
 !LICENSE
+
+lib/Text/*.[co]
+lib/Text/*.xs
+_build/
