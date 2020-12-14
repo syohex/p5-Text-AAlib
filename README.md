@@ -1,3 +1,4 @@
+[![Actions Status](https://github.com/syohex/p5-Text-AAlib/workflows/CI/badge.svg)](https://github.com/syohex/p5-Text-AAlib/actions)
 # NAME
 
 Text::AAlib - Perl Binding for AAlib

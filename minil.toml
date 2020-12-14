@@ -1,5 +1,6 @@
 name = "Text-AAlib"
 module_maker = "ModuleBuild"
+badges = ['github-actions/CI']
 
 [build]
 build_class = "builder::MyBuilder"
