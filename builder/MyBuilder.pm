@@ -6,7 +6,11 @@ use base 'Module::Build::XSUtil';
 use File::Which;
 use Devel::CheckLib;
 
-which('aalib-config') or exit 1;
+unless (which('aalib-config')) {
+    warn "missing 'aalib-config'. Please install aalib";
+    exit 1
+}
+
 my @link_flags = split ' ', `aalib-config --libs`;
 my @cflags     = split ' ', `aalib-config --cflags`;
 
