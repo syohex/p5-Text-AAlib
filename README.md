@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/syohex/p5-Text-AAlib/workflows/CI/badge.svg)](https://github.com/syohex/p5-Text-AAlib/actions)
+[![Actions Status](https://github.com/syohex/p5-Text-AAlib/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/syohex/p5-Text-AAlib/actions?workflow=test) [![MetaCPAN Release](https://badge.fury.io/pl/Text-AAlib.svg)](https://metacpan.org/release/Text-AAlib)
 # NAME
 
 Text::AAlib - Perl Binding for AAlib
